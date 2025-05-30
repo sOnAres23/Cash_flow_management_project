@@ -8,6 +8,10 @@ class Type(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Тип"
+        verbose_name_plural = "Типы"
+
 
 class Status(models.Model):
     """Вспомогательный класс для статусов записи о движении денежных средств (ДДС)"""
@@ -15,6 +19,10 @@ class Status(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Статус"
+        verbose_name_plural = "Статусы"
 
 
 class Category(models.Model):
@@ -29,6 +37,10 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+
 
 class Subcategory(models.Model):
     """
@@ -42,6 +54,10 @@ class Subcategory(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Подкатегория"
+        verbose_name_plural = "Подкатегории"
 
 
 class Record(models.Model):
@@ -83,3 +99,7 @@ class Record(models.Model):
 
     def __str__(self):
         return f'{self.date} - {self.status} - {self.type.name}'
+
+    class Meta:
+        verbose_name = "Запись"
+        verbose_name_plural = "Записи"

@@ -17,26 +17,50 @@ class RecordForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Динамическая фильтрация категорий по выбранному типу
-        if self.instance and self.instance.type:
-            self.fields['category'].queryset = Category.objects.filter(type=self.instance.type)
-            if self.instance.category:
-                self.fields['subcategory'].queryset = Subcategory.objects.filter(category=self.instance.category)
+        if self.instance and self.instance.pk:  # Проверяем, что instance существует и это не новая запись
+            if self.instance.type:
+                # Если тип записи существует, фильтруем категории по этому типу
+                self.fields['category'].queryset = Category.objects.filter(type=self.instance.type)
+                if self.instance.category:
+                    # Если категория уже выбрана, фильтруем подкатегории по этой категории
+                    self.fields['subcategory'].queryset = Subcategory.objects.filter(category=self.instance.category)
 
-        # Динамическая фильтрация подкатегорий по выбранной категории
+        # Фильтрация подкатегорий по категории при редактировании
         if 'category' in self.data:
             try:
                 category_id = int(self.data.get('category'))
                 self.fields['subcategory'].queryset = Subcategory.objects.filter(category_id=category_id)
             except (ValueError, TypeError):
                 pass
-        elif self.instance and self.instance.category:
-            self.fields['subcategory'].queryset = Subcategory.objects.filter(category=self.instance.category)
+        elif self.instance and self.instance.pk:
+            if self.instance.category:
+                # Проверяем, что у instance есть категория, чтобы фильтровать подкатегории
+                self.fields['subcategory'].queryset = Subcategory.objects.filter(category=self.instance.category)
+
+        # Если тип еще не выбран, фильтруем категории по всем типам
+        if self.instance and self.instance.pk:
+            if not self.instance.type:
+                self.fields['category'].queryset = Category.objects.all()
 
     def clean_amount(self):
+        """Проверка суммы на корректность"""
         amount = self.cleaned_data.get('amount')
         if amount <= 0:
             raise forms.ValidationError("Сумма должна быть больше нуля.")
         return amount
+
+    def clean(self):
+        """Проверка на зависимость категории и подкатегории"""
+        cleaned_data = super().clean()
+        category = cleaned_data.get('category')
+        subcategory = cleaned_data.get('subcategory')
+
+        # Проверяем зависимость категории и подкатегории
+        if category and subcategory:
+            if subcategory.category != category:
+                raise forms.ValidationError('Подкатегория должна относиться к выбранной категории.')
+
+        return cleaned_data
 
 
 class CategoryForm(forms.ModelForm):

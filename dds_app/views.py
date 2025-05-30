@@ -1,146 +1,222 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Record, Category, Subcategory, Type, Status
 from .forms import RecordForm, CategoryForm, SubcategoryForm, TypeForm, StatusForm
 
 
-def record_list(request):
-    """Представление для отображения списка всех записей о движении денежных средств.
-    Поддерживает фильтрацию по дате, статусу, типу, категории и подкатегории.
+class RecordListView(ListView):
     """
-    records = Record.objects.all()
-
-    # Фильтрация по дате
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    if start_date and end_date:
-        records = records.filter(date__range=[start_date, end_date])
-
-    # Фильтрация по статусу
-    status = request.GET.get('status')
-    if status:
-        records = records.filter(status=status)
-
-    # Фильтрация по типу
-    record_type = request.GET.get('type')
-    if record_type:
-        records = records.filter(type__name=record_type)
-
-    # Фильтрация по категории
-    category = request.GET.get('category')
-    if category:
-        records = records.filter(category__name=category)
-
-    # Фильтрация по подкатегории
-    subcategory = request.GET.get('subcategory')
-    if subcategory:
-        records = records.filter(subcategory__name=subcategory)
-
-    return render(request, 'record_list.html', {'records': records})
-
-
-def record_edit(request, pk):
+    Представление для отображения списка записей о движении денежных средств (ДДС).
+    Поддержка фильтрации по дате, статусу, типу, категории и подкатегории.
     """
-    Представление для редактирования существующей записи о движении денежных средств.
+    model = Record
+    template_name = 'dds_app/record_list.html'
+    context_object_name = 'records'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Фильтрация по дате
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        if start_date and end_date:
+            queryset = queryset.filter(date__range=[start_date, end_date])
+
+        # Фильтрация по статусу
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        # Фильтрация по типу
+        type = self.request.GET.get('type')
+        if type:
+            queryset = queryset.filter(type__name=type)
+
+        # Фильтрация по категории
+        category = self.request.GET.get('category')
+        if category:
+            queryset = queryset.filter(category__name=category)
+
+        # Фильтрация по подкатегории
+        subcategory = self.request.GET.get('subcategory')
+        if subcategory:
+            queryset = queryset.filter(subcategory__name=subcategory)
+
+        return queryset
+
+
+class RecordCreateView(CreateView):
     """
-    record = get_object_or_404(Record, pk=pk)
-
-    if request.method == "POST":
-        form = RecordForm(request.POST, instance=record)
-        if form.is_valid():
-            form.save()
-            return redirect('record_list')
-    else:
-        form = RecordForm(instance=record)
-    return render(request, 'record_form.html', {'form': form})
-
-
-def record_create(request):
+    Представление для создания новой записи о движении денежных средств (ДДС).
     """
-    Представление для создания новой записи о движении денежных средств.
+    model = Record
+    form_class = RecordForm
+    template_name = 'dds_app/record_form.html'
+    success_url = reverse_lazy('record_list')
+
+    def form_valid(self, form):
+        # Можно добавить дополнительные действия перед сохранением формы
+        return super().form_valid(form)
+
+
+class RecordUpdateView(UpdateView):
     """
-    if request.method == "POST":
-        form = RecordForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('record_list')
-    else:
-        form = RecordForm()
-    return render(request, 'record_form.html', {'form': form})
-
-
-def record_delete(request, pk):
+    Представление для редактирования существующей записи о движении денежных средств (ДДС).
     """
-    Представление для удаления записи о движении денежных средств.
+    model = Record
+    form_class = RecordForm
+    template_name = 'dds_app/record_form.html'
+    success_url = reverse_lazy('record_list')
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+
+class RecordDeleteView(DeleteView):
     """
-    record = get_object_or_404(Record, pk=pk)
-    record.delete()
-    return redirect('record_list')
-
-
-def category_edit(request, pk=None):
+    Представление для удаления записи о движении денежных средств (ДДС).
     """
-    Представление для создания или редактирования категории.
-    Если pk передан, то редактируем существующую категорию.
+    model = Record
+    template_name = 'dds_app/record_confirm_delete.html'
+    success_url = reverse_lazy('record_list')
+
+
+class CategoryListView(ListView):
+    model = Category
+    template_name = 'category_list.html'
+    context_object_name = 'categories'
+
+
+class CategoryCreateView(CreateView):
     """
-    if pk:
-        category = get_object_or_404(Category, pk=pk)
-        form = CategoryForm(request.POST or None, instance=category)
-    else:
-        form = CategoryForm(request.POST or None)
-
-    if form.is_valid():
-        form.save()
-        return redirect('category_list')
-
-    return render(request, 'category_form.html', {'form': form})
-
-
-def subcategory_edit(request, pk=None):
+    Представление для создания новой категории.
     """
-    Представление для создания или редактирования подкатегории.
+    model = Category
+    form_class = CategoryForm
+    template_name = 'dds_app/category_form.html'
+    success_url = reverse_lazy('category_list')
+
+
+class CategoryUpdateView(UpdateView):
     """
-    if pk:
-        subcategory = get_object_or_404(Subcategory, pk=pk)
-        form = SubcategoryForm(request.POST or None, instance=subcategory)
-    else:
-        form = SubcategoryForm(request.POST or None)
-
-    if form.is_valid():
-        form.save()
-        return redirect('subcategory_list')
-
-    return render(request, 'subcategory_form.html', {'form': form})
-
-
-def type_edit(request, pk=None):
+    Представление для редактирования существующей категории.
     """
-    Представление для создания или редактирования типа.
+    model = Category
+    form_class = CategoryForm
+    template_name = 'dds_app/category_form.html'
+    success_url = reverse_lazy('category_list')
+
+
+class CategoryDeleteView(DeleteView):
     """
-    if pk:
-        type_obj = get_object_or_404(Type, pk=pk)
-        form = TypeForm(request.POST or None, instance=type_obj)
-    else:
-        form = TypeForm(request.POST or None)
-
-    if form.is_valid():
-        form.save()
-        return redirect('type_list')
-
-    return render(request, 'type_form.html', {'form': form})
-
-
-def status_edit(request, pk=None):
+    Представление для удаления категории.
     """
-    Представление для создания или редактирования статуса.
+    model = Category
+    template_name = 'dds_app/category_confirm_delete.html'
+    success_url = reverse_lazy('category_list')
+
+
+class SubcategoryListView(ListView):
+    model = Subcategory
+    template_name = 'subcategory_list.html'
+    context_object_name = 'subcategories'
+
+
+class SubcategoryCreateView(CreateView):
     """
-    if pk:
-        status_obj = get_object_or_404(Status, pk=pk)
-        form = StatusForm(request.POST or None, instance=status_obj)
-    else:
-        form = StatusForm(request.POST or None)
+    Представление для создания новой подкатегории.
+    """
+    model = Subcategory
+    form_class = SubcategoryForm
+    template_name = 'dds_app/subcategory_form.html'
+    success_url = reverse_lazy('subcategory_list')
 
-    if form.is_valid():
-        form.save()
-        return redirect('status_list')
 
-    return render(request, 'status_form.html', {'form': form})
+class SubcategoryUpdateView(UpdateView):
+    """
+    Представление для редактирования существующей подкатегории.
+    """
+    model = Subcategory
+    form_class = SubcategoryForm
+    template_name = 'dds_app/subcategory_form.html'
+    success_url = reverse_lazy('subcategory_list')
+
+
+class SubcategoryDeleteView(DeleteView):
+    """
+    Представление для удаления подкатегории.
+    """
+    model = Subcategory
+    template_name = 'dds_app/subcategory_confirm_delete.html'
+    success_url = reverse_lazy('subcategory_list')
+
+
+class TypeListView(ListView):
+    model = Type
+    template_name = 'type_list.html'
+    context_object_name = 'types'
+
+
+class TypeCreateView(CreateView):
+    """
+    Представление для создания нового типа записи.
+    """
+    model = Type
+    form_class = TypeForm
+    template_name = 'dds_app/type_form.html'
+    success_url = reverse_lazy('type_list')
+
+
+class TypeUpdateView(UpdateView):
+    """
+    Представление для редактирования существующего типа записи.
+    """
+    model = Type
+    form_class = TypeForm
+    template_name = 'dds_app/type_form.html'
+    success_url = reverse_lazy('type_list')
+
+
+class TypeDeleteView(DeleteView):
+    """
+    Представление для удаления типа записи.
+    """
+    model = Type
+    template_name = 'dds_app/type_confirm_delete.html'
+    success_url = reverse_lazy('type_list')
+
+
+class StatusListView(ListView):
+    model = Status
+    template_name = 'status_list.html'
+    context_object_name = 'statuses'
+
+
+class StatusCreateView(CreateView):
+    """
+    Представление для создания нового статуса.
+    """
+    model = Status
+    form_class = StatusForm
+    template_name = 'dds_app/status_form.html'
+    success_url = reverse_lazy('status_list')
+
+
+class StatusUpdateView(UpdateView):
+    """
+    Представление для редактирования существующего статуса.
+    """
+    model = Status
+    form_class = StatusForm
+    template_name = 'dds_app/status_form.html'
+    success_url = reverse_lazy('status_list')
+
+
+class StatusDeleteView(DeleteView):
+    """
+    Представление для удаления статуса.
+    """
+    model = Status
+    template_name = 'dds_app/status_confirm_delete.html'
+    success_url = reverse_lazy('status_list')
+

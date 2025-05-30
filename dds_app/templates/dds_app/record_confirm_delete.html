@@ -1,0 +1,38 @@
+{% extends 'dds_app/base_generic.html' %}
+
+{% block content %}
+  <h1>Подтвердите удаление записи</h1>
+  <p>Вы уверены, что хотите удалить запись от {{ object.date }}?</p>
+  <table>
+    <tr>
+      <th>Статус</th>
+      <td>{{ object.get_status_display }}</td>
+    </tr>
+    <tr>
+      <th>Тип</th>
+      <td>{{ object.type.name }}</td>
+    </tr>
+    <tr>
+      <th>Категория</th>
+      <td>{{ object.category.name }}</td>
+    </tr>
+    <tr>
+      <th>Подкатегория</th>
+      <td>{{ object.subcategory.name }}</td>
+    </tr>
+    <tr>
+      <th>Сумма</th>
+      <td>{{ object.amount }} руб.</td>
+    </tr>
+    <tr>
+      <th>Комментарий</th>
+      <td>{{ object.comment }}</td>
+    </tr>
+  </table>
+  
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Удалить</button>
+    <a href="{% url 'record_list' %}">Отмена</a>
+  </form>
+{% endblock %}
