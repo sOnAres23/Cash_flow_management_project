@@ -1,0 +1,95 @@
+[
+{
+    "model": "dds_app.type",
+    "pk": 3,
+    "fields": {
+        "name": "Пополнение"
+    }
+},
+{
+    "model": "dds_app.type",
+    "pk": 4,
+    "fields": {
+        "name": "Списание"
+    }
+},
+{
+    "model": "dds_app.status",
+    "pk": 6,
+    "fields": {
+        "name": "Бизнес"
+    }
+},
+{
+    "model": "dds_app.status",
+    "pk": 7,
+    "fields": {
+        "name": "Личное"
+    }
+},
+{
+    "model": "dds_app.status",
+    "pk": 8,
+    "fields": {
+        "name": "Налог"
+    }
+},
+{
+    "model": "dds_app.category",
+    "pk": 2,
+    "fields": {
+        "name": "Маркетинг",
+        "type": 3
+    }
+},
+{
+    "model": "dds_app.category",
+    "pk": 4,
+    "fields": {
+        "name": "Маркетплэйс",
+        "type": 4
+    }
+},
+{
+    "model": "dds_app.subcategory",
+    "pk": 2,
+    "fields": {
+        "name": "Avito",
+        "category": 2
+    }
+},
+{
+    "model": "dds_app.subcategory",
+    "pk": 3,
+    "fields": {
+        "name": "Ozon",
+        "category": 4
+    }
+},
+{
+    "model": "dds_app.record",
+    "pk": 1,
+    "fields": {
+        "date": "2025-05-30",
+        "status": 6,
+        "type": 3,
+        "category": 2,
+        "subcategory": 2,
+        "amount": "10000.00",
+        "comment": ""
+    }
+},
+{
+    "model": "dds_app.record",
+    "pk": 2,
+    "fields": {
+        "date": "2025-05-30",
+        "status": 7,
+        "type": 4,
+        "category": 4,
+        "subcategory": 3,
+        "amount": "3000.00",
+        "comment": "Перевод за оплату товара"
+    }
+}
+]

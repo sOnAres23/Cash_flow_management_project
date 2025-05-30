@@ -3,7 +3,13 @@ from django.db import models
 
 class Type(models.Model):
     """Вспомогательный класс для типов записи о движении денежных средств (ДДС)"""
-    name = models.CharField(max_length=50)
+
+    TYPE_CHOICES = [
+        ('Пополнение', 'пополнение'),
+        ('Списание', 'списание'),
+    ]
+
+    name = models.CharField(max_length=10, choices=TYPE_CHOICES)
 
     def __str__(self):
         return self.name
@@ -15,7 +21,14 @@ class Type(models.Model):
 
 class Status(models.Model):
     """Вспомогательный класс для статусов записи о движении денежных средств (ДДС)"""
-    name = models.CharField(max_length=50)
+
+    STATUS_CHOICES = [
+        ('Бизнес', 'бизнес'),
+        ('Личное', 'личное'),
+        ('Налог', 'налог'),
+    ]
+
+    name = models.CharField(max_length=10, choices=STATUS_CHOICES)
 
     def __str__(self):
         return self.name
@@ -76,19 +89,8 @@ class Record(models.Model):
     Записи могут быть связаны с различными категориями и подкатегориями, которые в свою очередь
     должны быть привязаны к типу записи.
     """
-    STATUS_CHOICES = [
-        ('business', 'Бизнес'),
-        ('personal', 'Личное'),
-        ('tax', 'Налог'),
-    ]
-
-    TYPE_CHOICES = [
-        ('income', 'Пополнение'),
-        ('expense', 'Списание'),
-    ]
-
     date = models.DateField(auto_now_add=True, verbose_name="Дата записи")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, verbose_name="Статус записи")
+    status = models.ForeignKey(Status, related_name='records', on_delete=models.CASCADE, verbose_name="Статус записи")
     type = models.ForeignKey(Type, related_name='records', on_delete=models.CASCADE, verbose_name="Тип записи")
     category = models.ForeignKey(Category, related_name='records', on_delete=models.CASCADE,
                                  verbose_name="Категория записи")
@@ -98,7 +100,7 @@ class Record(models.Model):
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий (необязательное поле)")
 
     def __str__(self):
-        return f'{self.date} - {self.status} - {self.type.name}'
+        return f'{self.date} - {self.status.get_name_display()} - {self.type.get_name_display()}'
 
     class Meta:
         verbose_name = "Запись"

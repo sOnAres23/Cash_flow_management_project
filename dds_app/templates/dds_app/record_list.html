@@ -72,8 +72,8 @@
                 {% for record in records %}
                     <tr>
                         <td>{{ record.date }}</td>
-                        <td>{{ record.status }}</td>
-                        <td>{{ record.type.name }}</td>
+                        <td>{{ record.status.get_name_display }}</td>
+                        <td>{{ record.type.get_name_display }}</td>
                         <td>{{ record.category.name }}</td>
                         <td>{{ record.subcategory.name }}</td>
                         <td>{{ record.amount }}</td>

@@ -1,5 +1,6 @@
 from django import forms
 from .models import Record, Category, Subcategory, Type, Status
+from .services import validate_category_and_subcategory
 
 
 class RecordForm(forms.ModelForm):
@@ -50,15 +51,15 @@ class RecordForm(forms.ModelForm):
         return amount
 
     def clean(self):
-        """Проверка на зависимость категории и подкатегории"""
+        """Проверка на зависимость категории с типом и подкатегории"""
         cleaned_data = super().clean()
+
         category = cleaned_data.get('category')
         subcategory = cleaned_data.get('subcategory')
+        record_type = cleaned_data.get('type')
 
-        # Проверяем зависимость категории и подкатегории
-        if category and subcategory:
-            if subcategory.category != category:
-                raise forms.ValidationError('Подкатегория должна относиться к выбранной категории.')
+        # Вызов валидации "Бизнес-правила" из services.py
+        validate_category_and_subcategory(category, subcategory, record_type)
 
         return cleaned_data
 
