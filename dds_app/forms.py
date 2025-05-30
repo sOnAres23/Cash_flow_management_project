@@ -28,11 +28,8 @@ class RecordForm(forms.ModelForm):
 
         # Фильтрация подкатегорий по категории при редактировании
         if 'category' in self.data:
-            try:
-                category_id = int(self.data.get('category'))
-                self.fields['subcategory'].queryset = Subcategory.objects.filter(category_id=category_id)
-            except (ValueError, TypeError):
-                pass
+            category_id = int(self.data.get('category'))
+            self.fields['subcategory'].queryset = Subcategory.objects.filter(category_id=category_id)
         elif self.instance and self.instance.pk:
             if self.instance.category:
                 # Проверяем, что у instance есть категория, чтобы фильтровать подкатегории
